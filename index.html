@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Human Data Display</title>
+        <link rel="stylesheet" href="index.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" />
+        <script type="module" src="router.js"></script>
+    </head>
+    <body>
+        <span id="loader-wrapper">
+            <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+        </span>
+        <header>
+            <h1>Star Wars Info</h1>
+            <nav class="nav">
+                <div class="nav-div">
+                    <a href="/people" onclick="route(event, 'people')">
+                        <img src="/pics/icon-character.png" alt="people" />
+                    </a>
+                </div>
+                <div class="nav-div">
+                    <a href="/planets" onclick="route(event, 'planets')">
+                        <img src="/pics/icon-planet.png" alt="planets" />
+                    </a>
+                </div>
+                <div class="nav-div">
+                    <a href="/movies" onclick="route(event, 'movies')">
+                        <img src="/pics/icon-movie.png" alt="films" />
+                    </a>
+                </div>
+                <div class="nav-div">
+                    <a href="/" onclick="route(event, '')">
+                        <img src="/pics/icon-home.png" alt="home-page" />
+                    </a>
+                </div>
+                <div class="nav-div">
+                    <a href="/species" onclick="route(event, 'species')">
+                        <img src="/pics/icon-species.png" alt="species" />
+                    </a>
+                </div>
+                <div class="nav-div">
+                    <a href="/vehicles" onclick="route(event, 'vehicles')">
+                        <img src="/pics/icon-vehicle.png" alt="vehicles" />
+                    </a>
+                </div>
+                <div class="nav-div">
+                    <a href="/starships" onclick="route(event, 'starships')">
+                        <img src="/pics/icon-starship.png" alt="starships" />
+                    </a>
+                </div>
+            </nav>
+        </header>
+        <main>
+            <span id="index-loader">
+                <div class="lds-heart"><div></div></div>
+            </span>
+            <div id="content-box">
+            </div>
+        </main>
+        <footer>
+            <div id="pagination"></div>
+        </footer>
+    </body>
+</html>

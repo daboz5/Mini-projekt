@@ -1,0 +1,258 @@
+* {
+    box-sizing: border-box;
+    font-family: Roboto, sans-serif;
+}
+
+/*HEADER*/
+
+h1 {
+    margin: 30px 0 0 0;
+    font-size: 40px;
+    text-align: center;
+    text-shadow: 0 0 3px rgb(67, 67, 67), 0 0 2px rgb(255, 255, 255);
+}
+
+.nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0 20px 0;
+}
+
+.nav-div {
+    width: 75px;
+    height: 75px;
+    margin: 0px 7px;
+}
+
+img {
+    width: 75px;
+    height: 75px;
+}
+
+img:hover {
+    transform: scale(1.2);
+    transition-duration: 0.3s;
+}
+
+img:not(:hover) {
+    transition-duration: 0.1s;
+}
+
+/*MAIN*/
+
+#content-box {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.person-box {
+    width: 60%;
+    min-width: 360px;
+    max-width: 600px;
+    box-shadow: 0 0 15px;
+    border-radius: 5px 20px;
+    margin: 0 50px 25px 50px;
+    padding: 5px auto;
+}
+
+.text-box {
+    font-size: 17px;
+    text-align: center;
+}
+
+/*FOOTER*/
+
+#pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0 30px 0;
+    padding: 0;
+}
+
+#here {
+    margin: 0 15px;
+    border: solid 0px;
+    background-color: rgb(232, 232, 232);
+    border-radius: 10px;
+    box-shadow: inset 0 0 10px, 0 0 1px;
+}
+
+#page-num {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 11px 15px;
+}
+
+#next {
+    border: solid 0;
+    background-color: rgb(232, 232, 232);
+    border-radius: 10px;
+    box-shadow: 0 0 10px;
+}
+
+#next:hover {
+    box-shadow: inset 0 0 5px, 0 0 3px;
+}
+
+#next p {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 10px 20px;
+}
+
+#back {
+    border: solid 0;
+    background-color: rgb(232, 232, 232);
+    border-radius: 10px;
+    box-shadow: 0 0 10px;
+}
+
+#back:hover {
+    box-shadow: inset 0 0 5px, 0 0 3px;
+}
+
+#back p {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 10px 20px;
+}
+
+/*LOADER CODE*/
+#loader-wrapper {
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(240, 255, 255, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lds-ellipsis {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+  .lds-ellipsis div {
+    position: absolute;
+    top: 33px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: rgb(65, 65, 65);
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+  .lds-ellipsis div:nth-child(1) {
+    left: 8px;
+    animation: lds-ellipsis1 0.6s infinite;
+  }
+  .lds-ellipsis div:nth-child(2) {
+    left: 8px;
+    animation: lds-ellipsis2 0.6s infinite;
+  }
+  .lds-ellipsis div:nth-child(3) {
+    left: 32px;
+    animation: lds-ellipsis2 0.6s infinite;
+  }
+  .lds-ellipsis div:nth-child(4) {
+    left: 56px;
+    animation: lds-ellipsis3 0.6s infinite;
+  }
+  @keyframes lds-ellipsis1 {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes lds-ellipsis3 {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(0);
+    }
+  }
+  @keyframes lds-ellipsis2 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(24px, 0);
+    }
+  }
+
+/*HOME LOADER CODE*/
+#index-loader {
+    display: none;
+    position: static;
+    margin: 30% 0 0 0;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.lds-heart {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+    transform: rotate(45deg);
+    transform-origin: 40px 40px;
+}
+.lds-heart div {
+    top: 19px;
+    left: 20px;
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgb(255, 100, 100);
+    animation: lds-heart 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.lds-heart div:after,
+.lds-heart div:before {
+    content: " ";
+    position: absolute;
+    display: block;
+    width: 40px;
+    height: 40px;
+    background: rgb(255, 100, 100);
+}
+.lds-heart div:before {
+    left: -24px;
+    border-radius: 50% 0 0 50%;
+}
+  .lds-heart div:after {
+    top: -24px;
+    border-radius: 50% 50% 0 0;
+}
+@keyframes lds-heart {
+    0% {
+      transform: scale(0.95);
+    }
+    5% {
+      transform: scale(1.1);
+    }
+    39% {
+      transform: scale(0.85);
+    }
+    45% {
+      transform: scale(1);
+    }
+    60% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(0.9);
+    }
+}  
