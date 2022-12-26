@@ -33,6 +33,7 @@ const changeLocation = async (path) => {
         getTransportInfo();
     } else if (path == "starships") {
         getShipsInfo();
+        console.log('git test');
     }
 }
 
