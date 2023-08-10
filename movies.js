@@ -1,63 +1,41 @@
-import { disableLoader, removeDivs, removePagination } from "./short_functions.js";
+import { disableLoader, getInfo, createContentTags, finalizeContent, removeAllContent } from "./utilities.js";
 
-var api_url = "https://swapi.dev/api/films/";
 const log = console.log;
 const doc = document;
-const contentBox = doc.getElementById("content-box");
 
-var globalNext = "I am Next";
-var globalBack = "I am Previous";
-var globalCountPages = 0;
+function setContent (num, arr) {
+    for (let i = 0; i < num; i++) {
+        const {child, childContent, childBold, childLinebreak} = createContentTags();
 
-function setDivs (numRequest, arr) {
-    for (let i = 0; i < numRequest; i++) {
-        const newDiv = doc.createElement("div");
-        const infoBox = doc.createElement("p");
-        const boldNode = doc.createElement("b");
-        const lineBreak = doc.createElement("br");
-        
-        newDiv.setAttribute("class", "person-box");
-        infoBox.setAttribute("class", "text-box");
+        let boldStart1 = "Moj naslov je ";
+        childBold.append(arr[i].title);
+        let boldEnd1 = ".";
 
-        boldNode.append(arr[i].title);
-        boldNode.setAttribute("id", `${i}title`);
+        let italicStart1 = "Direktor ";
+        const childItalic1 = doc.createElement("i");
+        childItalic1.append(arr[i].director);
+        let italicEnd1 = " me je dokončal";
 
-        const italicDirector = doc.createElement("i");
-        let directorStart = `Direktor `;
-        let director = arr[i].director;
-        let directorEnd = ` me je dokončal`;
-        italicDirector.append(director);
-
-        const italicYear = doc.createElement("i");
-        let yearInit = arr[i].release_date;
-        let yearString = ""
+        let italicStart2 = " leta ";
+        const childItalic2 = doc.createElement("i");
+        let year = "";
         for (let j = 0; j < 4; j++) {
-            yearString += yearInit[j];
+            year += arr[i].release_date[j];
         }
-        italicYear.append(yearString);
+        childItalic2.append(year);
+        let italicEnd2 = ".";
 
-        let content = ["Moj naslov je ", boldNode, ".", lineBreak, directorStart, italicDirector, directorEnd, " leta ", italicYear, "."];
-        content.forEach(element => infoBox.append(element));
-
-        newDiv.append(infoBox);
-        contentBox.appendChild(newDiv);
+        let content = [boldStart1, childBold, boldEnd1, childLinebreak, italicStart1, childItalic1, italicEnd1, italicStart2, childItalic2, italicEnd2];
+        finalizeContent(child, childContent, content);
     }
 }
 
-async function getMoviesInfo () {
-    let response = await fetch(api_url);
-    let data = await response.json();
-    let dataSize = data.results.length;
-    let rawMovies = data.results;
-    let infoMovies = rawMovies.map(({title, release_date, director}) => ({title, release_date, director}));
-    globalNext = data.next;
-    globalBack = data.previous;
-    globalCountPages = Math.trunc(data.count / dataSize);
-log(rawMovies)
-    removePagination();
-    removeDivs();
-    setDivs(dataSize, infoMovies);
+async function getMovies (api_url_movies) {
+    const {dataSizePage, rawData} = await getInfo(api_url_movies);
+    let infoMovies = rawData.map(({title, release_date, director}) => ({title, release_date, director}));
+    removeAllContent();
+    setContent(dataSizePage, infoMovies);
     disableLoader();
 }
 
-export {getMoviesInfo};
+export {getMovies};

@@ -1,20 +1,19 @@
-import { disableLoader, removeDivs, removePagination } from "./short_functions.js";
+import { disableLoader, removeContent, removePagination } from "./utilities.js";
 
 const log = console.log;
 const doc = document;
 
+const homeContent = doc.getElementById("index-loader");
+
 function setHomePage () {
-    const homeContent = doc.getElementById("index-loader");
     homeContent.style.display = "flex";
-    removeDivs();
+    removeContent();
     removePagination();
     disableLoader();
 }
 
-function endHomePage () {
-    const homeContent = doc.getElementById("index-loader");
+function removeHomePage () {
     homeContent.style.display = "none";
 }
 
-export {setHomePage};
-export {endHomePage};
+export { setHomePage, removeHomePage };

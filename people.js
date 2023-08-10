@@ -1,180 +1,96 @@
-import { enableLoader, disableLoader, removeDivs, removePagination, disablePagination, enablePagination } from "./short_functions.js";
+import { findPageNum, enableLoader, disableLoader, removeContent, disablePagination, enablePagination, createContentTags, setPagination, finalizeContent, updatePaginationTags, removeAllContent, getInfo, finalizePagination } from "./utilities.js";
 
-var api_url = "https://swapi.dev/api/people/";
 const log = console.log;
 const doc = document;
-const contentBox = doc.getElementById("content-box");
 
-var pageListener = 1;
-var pageCounter = 1;
-var globalNext = "I am Next";
-var globalBack = "I am Previous";
-var globalCountPages = 0;
+function setContent (num, arr) {
+    for (let i = 0; i < num; i++) {
+        const {child, childContent, childBold, childLinebreak} = createContentTags();
 
-function setDivs (numRequest, arr) {
-    for (let i = 0; i < numRequest; i++) {
-        const newDiv = doc.createElement("div");
-        const infoBox = doc.createElement("p");
-        const boldNode = doc.createElement("b");
-        const lineBreak = doc.createElement("br");
-        newDiv.classList.add("person-box");
-        infoBox.classList.add("text-box");
+        let boldStart1 = "Ime mi je ";
+        childBold.append(arr[i].name);
+        let boldEnd1 = ".";
 
-        let name = arr[i].name;
-        boldNode.append(name);
-        boldNode.setAttribute("id", `${i}name`);
-
+        const childItalic1 = doc.createElement("i");
         if (arr[i].gender == "female") {
-            var height = `Visoka sem `;
+            var italicStart1 = "Visoka sem ";
         } else {
-            var height = `Visok sem `;
+            var italicStart1 = "Visok sem ";
         }
-        const italicHeight = doc.createElement("i");
-        italicHeight.append(arr[i].height + " cm");
-        italicHeight.setAttribute("id", `${i}height`);
+        childItalic1.append(`${arr[i].height} cm`);
 
-        const italicMass = doc.createElement("i");
-        italicMass.append(arr[i].mass + " kg.");
-        italicMass.setAttribute("id", `${i}mass`);
+        const childItalic2 = doc.createElement("i");
+        const italicStart2 = " in imam ";
+        if (arr[i].mass == "unknown") {
+            childItalic2.append("neznano težo");
+        } else {
+            childItalic2.append(`${arr[i].mass} kg`);
+        }
+        const italicEnd2 = ".";
 
-        let content = ["Ime mi je ", boldNode, ".", lineBreak, height, italicHeight, " in imam ", italicMass]
-        content.forEach(element => infoBox.append(element))
+        let content = [boldStart1, childBold, boldEnd1, childLinebreak, italicStart1, childItalic1, italicStart2, childItalic2, italicEnd2];
+        finalizeContent(child, childContent, content)
 
-        newDiv.append(infoBox);
-        contentBox.appendChild(newDiv);
-
-        doc.getElementById(`${i}name`).style.color = `${arr[i].eye_color}`;
-        doc.getElementById(`${i}height`).style.fontSize = `${(arr[i].height / 10)}px`;
-        doc.getElementById(`${i}height`).style.textDecoration = "underline";
-        doc.getElementById(`${i}mass`).style.fontSize = `${(arr[i].height / 10)}px`;
-        doc.getElementById(`${i}mass`).style.textDecoration = "underline";
+        childBold.style.color = `${arr[i].eye_color}`;
+        childItalic1.style.fontSize = `${(arr[i].height / 10)}px`;
+        childItalic1.style.textDecoration = "underline";
+        childItalic2.style.fontSize = `${(arr[i].height / 10)}px`;
+        childItalic2.style.textDecoration = "underline";
     }
 }
 
-function setPagination () {
-    const hereButton = doc.createElement("button");
-    const nextButton = doc.createElement("button");
-    const hereP = doc.createElement("p");
-    const nextP = doc.createElement("p");
-
-    hereP.setAttribute("id", "page-num");
-    hereButton.setAttribute("id", "here");
-    nextButton.setAttribute("id", "next");
-    nextButton.addEventListener("click", () => click('next'));
-
-    let here = `Page ${pageCounter}`;
-    let next = "Next";
-
-    hereP.append(here);
-    nextP.append(next);
-    hereButton.append(hereP);
-    nextButton.append(nextP);
-    doc.getElementById("pagination").append(hereButton);
-    doc.getElementById("pagination").append(nextButton);
-}
-
-async function updatePeopleInfo () {
+async function updatePeople (newPageNum) {
     disablePagination();
 
-    let response = await fetch(api_url);
-    let data = await response.json()
-    let dataSize = data.results.length;
-    let rawPeople = data.results;
-    let infoPeople = rawPeople.map(({name, height, mass, gender, eye_color}) => ({name, height, mass, gender, eye_color}));
-    globalNext = data.next;
-    globalBack = data.previous;
+    const api_url = "https://swapi.dev/api/people/"
+    let api_url_people = (api_url + `?page=${newPageNum}`);
+    const {dataSizeAll, dataSizePage, rawData, api_next} = await getInfo(api_url_people);
     
-    enablePagination();
-    if (globalNext === null) {
+    let infoPeople = rawData.map(({name, height, mass, gender, eye_color}) => ({name, height, mass, gender, eye_color}));   
+    let numOfPages = Math.trunc(dataSizeAll / dataSizePage);
+
+    removeContent();
+    if (api_next === null) {
         doc.getElementById("next").remove();
     }
-    removeDivs();
-    setDivs(dataSize, infoPeople);
+
+    setContent(dataSizePage, infoPeople);
+    enablePagination();
+    return numOfPages;
 }
 
-async function updatePage (move) {
-    const makeNext = doc.createElement("button");
-    const makeBack = doc.createElement("button");
-    let updateP = doc.createElement("p");
-    const nextP = doc.createElement("p");
-    const backP = doc.createElement("p");
-    makeNext.setAttribute("id", "next");
-    makeNext.addEventListener("click", () => click('next'));
-    makeBack.setAttribute("id", "back");
-    makeBack.addEventListener("click", () => click('back'));
-    updateP.setAttribute("id", "page-num");
-    const loc = doc.getElementById("pagination");
-    const hereId = doc.getElementById("here");
-    const pageId = doc.getElementById("page-num");
-    const nextId = doc.getElementById("next");
-    const backId = doc.getElementById("back");
-    let update = `Page ${pageCounter}`;
-    let next = "Next";
-    let back = "Back";
-    nextP.append(next);
-    backP.append(back);
-    makeNext.append(nextP);
-    makeBack.append(backP);
-    updateP.append(update);
+async function updateAllContent (move) {
+    let newPageNum = findPageNum(move);
 
-    await updatePeopleInfo();
+    const {nextTag, backTag} = updatePaginationTags();
+    nextTag.addEventListener("click", () => click('next'));
+    backTag.addEventListener("click", () => click('back'));
 
-    if (pageListener == 1 && move == "next") {
-        pageId.replaceWith(updateP);
-        loc.insertBefore(makeBack, hereId);
-        pageListener++;
-    } else if (pageListener == 2 && move == "back") {
-        pageId.replaceWith(updateP);
-        backId.remove();
-        pageListener--;
-    } else if (pageListener > (globalCountPages - 1) && move == "next") {
-        pageId.replaceWith(updateP);
-        nextId.remove();
-        pageListener++;
-    } else if (pageListener > globalCountPages && move == "back") {
-        pageId.replaceWith(updateP);
-        loc.append(makeNext);
-        pageListener--;
-    } else if (pageListener > 1 && pageListener <= globalCountPages && move == "next") {
-        pageId.replaceWith(updateP);
-        pageListener++;
-    } else if (pageListener > 1 && pageListener <= globalCountPages && move == "back") {
-        pageId.replaceWith(updateP);
-        pageListener--;
-    }
+    let numOfPages = await updatePeople(newPageNum);
 
-    disableLoader();
+    finalizePagination(numOfPages, newPageNum, move, nextTag, backTag);
 }
 
-async function getPeopleInfo () {
-    let response = await fetch(api_url);
-    let data = await response.json();
-    let dataSize = data.results.length;
-    let rawPeople = data.results;
-    let infoPeople = rawPeople.map(({name, height, mass, gender, eye_color}) => ({name, height, mass, gender, eye_color}));
-    globalNext = data.next;
-    globalBack = data.previous;
-    globalCountPages = Math.trunc(data.count / dataSize);
-    
-    removePagination();
-    setPagination();
-    removeDivs()
-    setDivs(dataSize, infoPeople);
-    disableLoader();
-}
-
-function click(value) {
+const click = (value) => {
+    enableLoader();
     if (value == "next") {
-        api_url = globalNext;
-        pageCounter++;
-        enableLoader();
-        updatePage("next");
+        updateAllContent("next");
     } else if (value == "back") {
-        api_url = globalBack;
-        pageCounter--;
-        enableLoader();
-        updatePage("back");
+        updateAllContent("back");
     }
 }
 
-export {getPeopleInfo};
+async function getPeople (api_url_people) {
+    const {dataSizePage, rawData} = await getInfo(api_url_people);
+    let infoPeople = rawData.map(({name, height, mass, gender, eye_color}) => ({name, height, mass, gender, eye_color}));
+
+    removeAllContent();
+
+    const nextTag = setPagination();
+    nextTag.addEventListener("click", () => click('next'));
+    
+    setContent(dataSizePage, infoPeople);
+    disableLoader();
+}
+
+export {getPeople};

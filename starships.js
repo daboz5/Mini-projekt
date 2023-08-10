@@ -1,206 +1,119 @@
-import { enableLoader, disableLoader, removeDivs, removePagination, disablePagination, enablePagination } from "./short_functions.js";
+import { findPageNum, enableLoader, disableLoader, removeContent, disablePagination, enablePagination, createContentTags, setPagination, finalizeContent, updatePaginationTags, removeAllContent, getInfo, finalizePagination } from "./utilities.js";
 
-var api_url = "https://swapi.dev/api/starships/";
 const log = console.log;
 const doc = document;
-const contentBox = doc.getElementById("content-box");
 
-var pageListener = 1;
-var pageCounter = 1;
-var globalNext = "I am Next";
-var globalBack = "I am Previous";
-var globalCountPages = 0;
+function setContent (num, arr) {
+    for (let i = 0; i < num; i++) {
+        const {child, childContent, childBold, childLinebreak} = createContentTags();
 
-function setDivs (numRequest, arr) {
-    for (let i = 0; i < numRequest; i++) {
-        const newDiv = doc.createElement("div");
-        const infoBox = doc.createElement("p");
-        const boldNode = doc.createElement("b");
-        const lineBreak = doc.createElement("br");
-        
-        newDiv.setAttribute("class", "person-box");
-        infoBox.setAttribute("class", "text-box");
+        let boldStart1 = "Sem ";
+        childBold.append(arr[i].name);
+        let boldEnd1 = ".";
 
-        let boldNodeStart = `Sem `;
-        boldNode.append(`${arr[i].name}`);
-        boldNode.setAttribute("id", `${i}name`);
-        let boldNodeEnd = `.`
-
-        const italicPassenger = doc.createElement("i");
-        if (arr[i].passengers === 1 || arr[i].passengers === 2) {
-            var passenger = `Prevažam lahko `;
-            var passengerNum = `${arr[i].passengers}`;
-            var passengerEnd = ` potnika`;
-        } else if (arr[i].passengers === 3 || arr[i].passengers === 4) {
-            var passenger = `Prevažam lahko `;
-            var passengerNum = `${arr[i].passengers}`;
-            var passengerEnd = ` potnike`;
+        var childItalic1 = doc.createElement("i");
+        if (arr[i].passengers == 1 || arr[i].passengers == 2) {
+            var italicStart1 = "Prevažam lahko ";
+            childItalic1.append(`${arr[i].passengers}`);
+            var italicEnd1 = " potnika";
+        } else if (arr[i].passengers == 3 || arr[i].passengers == 4) {
+            var italicStart1 = "Prevažam lahko ";
+            childItalic1.append(`${arr[i].passengers}`);
+            var italicEnd1 = " potnike";
         } else if (arr[i].passengers === "n/a" || arr[i].passengers === "unknown") {
-            var passenger = `Prevažam lahko `;
-            var passengerNum = `neznano število`;
-            var passengerEnd = ` potnikov`;
+            var italicStart1 = "Prevažam lahko ";
+            childItalic1.append(`neznano število`);
+            var italicEnd1 = " potnikov";
         } else if (arr[i].passengers === undefined) {
-            var passenger = ``;
-            var passengerNum = `Ne prevažam`;
-            var passengerEnd = ` potnikov`;
+            var italicStart1 = "";
+            childItalic1.append(`Ne prevažam`);
+            var italicEnd1 = " potnikov";
         } else {
-            var passenger = `Prevažam lahko `;
-            var passengerNum = `${arr[i].passengers}`;
-            var passengerEnd = ` potnikov`;
+            var italicStart1 = "Prevažam lahko ";
+            childItalic1.append(`${arr[i].passengers}`);
+            var italicEnd1 = " potnikov";
         }
-        italicPassenger.append(passengerNum);
 
-        const italicCrew = doc.createElement("i");
+        var childItalic2 = doc.createElement("i");
         if (arr[i].crew == 1 || arr[i].crew == 2) {
-            var crewNum = ` ${arr[i].crew}`;
-            var crew = ` člana posadke.`;
+            var italicStart2 = " ter ";
+            childItalic2.append(`${arr[i].crew}`);
+            var italicEnd2 = " člana posadke.";
         } else if (arr[i].crew == 3 || arr[i].crew == 4) {
-            var crewNum = ` ${arr[i].crew}`;
-            var crew = ` člane posadke.`;
+            var italicStart2 = " ter ";
+            childItalic2.append(`${arr[i].crew}`);
+            var italicEnd2 = " člane posadke.";
         } else if (arr[i].crew == "n/a" || arr[i].crew == "unknown") {
-            var crewNum = ` neznano število`;
-            var crew = ` članov posadke.`;
+            var italicStart2 = " ter ";
+            childItalic2.append(`neznano število`);
+            var italicEnd2 = " članov posadke.";
         } else if (arr[i].crew === undefined) {
-            var crewNum = `ne prevažam`;
-            var crew = ` članov posadke.`;
+            var italicStart2 = " ter ";
+            childItalic2.append(`ne prevažam`);
+            var italicEnd2 = " članov posadke.";
         } else {
-            var crewNum = ` ${arr[i].crew}`;
-            var crew = ` članov posadke.`;
+            var italicStart2 = " ter ";
+            childItalic2.append(`${arr[i].crew}`);
+            var italicEnd2 = " članov posadke.";
         }
-        italicCrew.append(crewNum);
 
-        let content = [boldNodeStart, boldNode, boldNodeEnd, lineBreak, passenger, italicPassenger, passengerEnd, " in", italicCrew, crew];
-        content.forEach(element => infoBox.append(element));
-
-        newDiv.append(infoBox);
-        contentBox.appendChild(newDiv);
+        let content = [boldStart1, childBold, boldEnd1, childLinebreak, italicStart1, childItalic1, italicEnd1, italicStart2, childItalic2, italicEnd2];
+        finalizeContent(child, childContent, content)
     }
 }
 
-function setPagination () {
-    const hereButton = doc.createElement("button");
-    const nextButton = doc.createElement("button");
-    const hereP = doc.createElement("p");
-    const nextP = doc.createElement("p");
-
-    hereP.setAttribute("id", "page-num");
-    hereButton.setAttribute("id", "here");
-    nextButton.setAttribute("id", "next");
-    nextButton.addEventListener("click", () => click('next'));
-    
-    let here = `Page ${pageCounter}`;
-    let next = "Next";
-
-    hereP.append(here);
-    nextP.append(next);
-    hereButton.append(hereP);
-    nextButton.append(nextP);
-    doc.getElementById("pagination").append(hereButton);
-    doc.getElementById("pagination").append(nextButton);
-}
-
-async function updateShipInfo () {
+async function updateStarships (newPageNum) {
     disablePagination();
 
-    let response = await fetch(api_url);
-    let data = await response.json()
-    let dataSize = data.results.length;
-    let rawStarship = data.results;
-    let infoStarship = rawStarship.map(({name, passengers, crew}) => ({name, passengers, crew}));
-    globalNext = data.next;
-    globalBack = data.previous;
+    const api_url = "https://swapi.dev/api/starships/"
+    let api_url_starships = (api_url + `?page=${newPageNum}`);
+    const {dataSizeAll, dataSizePage, rawData, api_next} = await getInfo(api_url_starships);
+    
+    let infoStarships = rawData.map(({name, passengers, crew}) => ({name, passengers, crew}));   
+    let numOfPages = Math.trunc(dataSizeAll / dataSizePage);
 
-    enablePagination();
-    if (globalNext === null) {
+    removeContent();
+    if (api_next === null) {
         doc.getElementById("next").remove();
     }
-    removeDivs();
-    setDivs(dataSize, infoStarship);
+
+    setContent(dataSizePage, infoStarships);
+    enablePagination();
+    return numOfPages;
 }
 
-async function updatePage (move) {
-    const makeNext = doc.createElement("button");
-    const makeBack = doc.createElement("button");
-    let updateP = doc.createElement("p");
-    const nextP = doc.createElement("p");
-    const backP = doc.createElement("p");
-    makeNext.setAttribute("id", "next");
-    makeNext.addEventListener("click", () => click('next'));
-    makeBack.setAttribute("id", "back");
-    makeBack.addEventListener("click", () => click('back'));
-    updateP.setAttribute("id", "page-num");
-    const loc = doc.getElementById("pagination");
-    const hereId = doc.getElementById("here");
-    const pageId = doc.getElementById("page-num");
-    const nextId = doc.getElementById("next");
-    const backId = doc.getElementById("back");
-    let update = `Page ${pageCounter}`;
-    let next = "Next";
-    let back = "Back";
-    nextP.append(next);
-    backP.append(back);
-    makeNext.append(nextP);
-    makeBack.append(backP);
-    updateP.append(update);
-    
-    await updateShipInfo();
+async function updateAllContent (move) {
+    let newPageNum = findPageNum(move);
 
-    if (pageListener == 1 && move == "next") {
-        pageId.replaceWith(updateP);
-        loc.insertBefore(makeBack, hereId);
-        pageListener++;
-    } else if (pageListener == 2 && move == "back") {
-        pageId.replaceWith(updateP);
-        backId.remove();
-        pageListener--;
-    } else if (pageListener > (globalCountPages - 1) && move == "next") {
-        pageId.replaceWith(updateP);
-        nextId.remove();
-        pageListener++;
-    } else if (pageListener > globalCountPages && move == "back") {
-        pageId.replaceWith(updateP);
-        loc.append(makeNext);
-        pageListener--;
-    } else if (pageListener > 1 && pageListener <= globalCountPages && move == "next") {
-        pageId.replaceWith(updateP);
-        pageListener++;
-    } else if (pageListener > 1 && pageListener <= globalCountPages && move == "back") {
-        pageId.replaceWith(updateP);
-        pageListener--;
-    }
+    const {nextTag, backTag} = updatePaginationTags();
+    nextTag.addEventListener("click", () => click('next'));
+    backTag.addEventListener("click", () => click('back'));
 
-    disableLoader();
+    let numOfPages = await updateStarships(newPageNum);
+
+    finalizePagination(numOfPages, newPageNum, move, nextTag, backTag);
 }
 
-async function getShipsInfo () {
-    let response = await fetch(api_url);
-    let data = await response.json();
-    let dataSize = data.results.length;
-    let rawStarship = data.results;
-    let infoStarship = rawStarship.map(({name, passengers, crew}) => ({name, passengers, crew}));
-    globalNext = data.next;
-    globalBack = data.previous;
-    globalCountPages = Math.trunc(data.count / dataSize);
-
-    removePagination();
-    setPagination();
-    removeDivs();
-    setDivs(dataSize, infoStarship);
-    disableLoader();
-}
-
-function click(value) {
+const click = (value) => {
+    enableLoader();
     if (value == "next") {
-        api_url = globalNext;
-        pageCounter++;
-        enableLoader();
-        updatePage("next");
+        updateAllContent("next");
     } else if (value == "back") {
-        api_url = globalBack;
-        pageCounter--;
-        enableLoader();
-        updatePage("back");
+        updateAllContent("back");
     }
 }
 
-export {getShipsInfo};
+async function getShips (api_url_ships) {
+    const {dataSizePage, rawData} = await getInfo(api_url_ships);
+    let infoStarships = rawData.map(({name, passengers, crew}) => ({name, passengers, crew}));
+
+    removeAllContent();
+
+    const nextTag = setPagination();
+    nextTag.addEventListener("click", () => click('next'));
+    
+    setContent(dataSizePage, infoStarships);
+    disableLoader();
+}
+
+export {getShips};

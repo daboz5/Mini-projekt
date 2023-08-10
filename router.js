@@ -1,42 +1,41 @@
-import { setHomePage, endHomePage } from "./index.js";
-import { enableLoader } from "./short_functions.js";
-import { getPeopleInfo } from "./people.js";
-import { getShipsInfo } from "./starships.js";
-import { getPlanetsInfo } from "./planets.js";
-import { getMoviesInfo } from "./movies.js";
-import { getSpeciesInfo } from "./species.js";
-import { getTransportInfo } from "./vehicles.js";
+import { setHomePage, removeHomePage } from "./index.js";
+import { enableLoader } from "./utilities.js";
+import { getPeople } from "./people.js";
+import { getShips } from "./starships.js";
+import { getPlanets } from "./planets.js";
+import { getMovies } from "./movies.js";
+import { getSpecies } from "./species.js";
+import { getTransport } from "./vehicles.js";
 
 const log = console.log;
+const api_url = "https://swapi.dev/api/";
 
-function route (event, path) {
+const availableMoves = {
+    "people": () => getPeople(api_url + "people/"),
+    "planets": () => getPlanets(api_url + "planets/"),
+    "movies": () => getMovies(api_url + "films/"),
+    "species": () => getSpecies(api_url + "species/"),
+    "vehicles": () => getTransport(api_url + "vehicles/"),
+    "starships": () => getShips(api_url + "starships/")
+}
+
+const changeLocation = async (path) => {
+    removeHomePage();
+    enableLoader();
+    if (availableMoves[path] !== undefined) {
+        availableMoves[path]();
+    } else {
+        setHomePage();
+    }
+}
+
+const route = (event, path) => {
     event = event || window.event;
     event.preventDefault();
     window.history.pushState({}, "", window.location.origin + "/" + path);
     changeLocation(path);
 }
 
-const changeLocation = async (path) => {
-    endHomePage();
-    enableLoader();
-    if (path == "people") {
-        getPeopleInfo();
-    } else if (path == "planets") {
-        getPlanetsInfo();
-    } else if (path == "movies") {
-        getMoviesInfo();
-    } else if (path == "") {
-        setHomePage();
-    } else if (path == "species") {
-        getSpeciesInfo();
-    } else if (path == "vehicles") {
-        getTransportInfo();
-    } else if (path == "starships") {
-        getShipsInfo();
-        console.log('git test');
-    }
-}
-
-setHomePage();
+changeLocation(window.location.pathname?.substring(1));
 
 window.route = route;

@@ -1,184 +1,92 @@
-import { enableLoader, disableLoader, removeDivs, removePagination, disablePagination, enablePagination } from "./short_functions.js";
+import { findPageNum, enableLoader, disableLoader, removeContent, disablePagination, enablePagination, createContentTags, setPagination, finalizeContent, updatePaginationTags, removeAllContent, getInfo, finalizePagination } from "./utilities.js";
 
-var api_url = "https://swapi.dev/api/species/";
 const log = console.log;
 const doc = document;
-const contentBox = doc.getElementById("content-box");
 
-var pageListener = 1;
-var pageCounter = 1;
-var globalNext = "I am Next";
-var globalBack = "I am Previous";
-var globalCountPages = 0;
+function setContent (num, arr) {
+    for (let i = 0; i < num; i++) {
+        const {child, childContent, childBold, childLinebreak} = createContentTags();
 
-function setDivs (numRequest, arr) {
-    for (let i = 0; i < numRequest; i++) {
-        const newDiv = doc.createElement("div");
-        const infoBox = doc.createElement("p");
-        const boldNode = doc.createElement("b");
-        const lineBreak = doc.createElement("br");
-        
-        newDiv.setAttribute("class", "person-box");
-        infoBox.setAttribute("class", "text-box");
+        let boldStart1 = "Smo ";
+        childBold.append(arr[i].name);
+        let boldEnd1 = " vrste";
 
-        let boldNodeStart = `Mi smo `;
-        boldNode.append(`${arr[i].name}`);
-        boldNode.setAttribute("id", `${i}name`);
-        let boldNodeEnd = ` vrste.`
-
-        const italicClass = doc.createElement("i");
+        var childItalic1 = doc.createElement("i");
+        var italicStart1 = "Sodimo med ";
         if (arr[i].classification == "unknown") {
-            var classStart = `Sodimo med `;
-            var classy = `neznane`;
-            var classEnd = ` vrste`;
+            childItalic1.append(`neznane`);
         } else {
-            var classStart = `Sodimo med `;
-            var classy = `${arr[i].classification}`;
-            var classEnd = ` vrste`;
+            var italicStart1 = "Sodimo med ";
+            childItalic1.append(`${arr[i].classification}`);
         }
-        italicClass.append(classy);
+        var italicEnd1 = " vrste";
 
-        const italicLang = doc.createElement("i");
+        var childItalic2 = doc.createElement("i");
+        var italicStart2 = " in govorimo ";
         if (arr[i].language == "n/a") {
-            var langStart = ` govorimo `;
-            var lang = `vsak`;
-            var langEnd = ` jezik.`;
-        } else {
-            var langStart = ` govorimo `;
-            var lang = `${arr[i].language}`;
-            var langEnd = ` jezik.`;
+            childItalic2.append(`vsak`);
+        }  else {
+            childItalic2.append(`${arr[i].language}`);
         }
-        italicLang.append(lang);
+        var italicEnd2 = " jezik.";
 
-        let content = [boldNodeStart, boldNode, boldNodeEnd, lineBreak, classStart, italicClass, classEnd, " in", langStart, italicLang, langEnd];
-        content.forEach(element => infoBox.append(element));
-
-        newDiv.append(infoBox);
-        contentBox.appendChild(newDiv);
+        let content = [boldStart1, childBold, boldEnd1, childLinebreak, italicStart1, childItalic1, italicEnd1, italicStart2, childItalic2, italicEnd2];
+        finalizeContent(child, childContent, content)
     }
 }
 
-function setPagination () {
-    const hereButton = doc.createElement("button");
-    const nextButton = doc.createElement("button");
-    const hereP = doc.createElement("p");
-    const nextP = doc.createElement("p");
-
-    hereP.setAttribute("id", "page-num");
-    hereButton.setAttribute("id", "here");
-    nextButton.setAttribute("id", "next");
-    nextButton.addEventListener("click", () => click('next'));
-    
-    let here = `Page ${pageCounter}`;
-    let next = "Next";
-
-    hereP.append(here);
-    nextP.append(next);
-    hereButton.append(hereP);
-    nextButton.append(nextP);
-    doc.getElementById("pagination").append(hereButton);
-    doc.getElementById("pagination").append(nextButton);
-}
-
-async function updateSpeciesInfo () {
+async function updateSpecies (newPageNum) {
     disablePagination();
 
-    let response = await fetch(api_url);
-    let data = await response.json()
-    let dataSize = data.results.length;
-    let rawSpecies = data.results;
-    let infoSpecies = rawSpecies.map(({name, classification, language}) => ({name, classification, language}));
-    globalNext = data.next;
-    globalBack = data.previous;
-
-    enablePagination();
-    removeDivs();
-    setDivs(dataSize, infoSpecies);
-}
-
-async function updatePage (move) {
-    const makeNext = doc.createElement("button");
-    const makeBack = doc.createElement("button");
-    let updateP = doc.createElement("p");
-    const nextP = doc.createElement("p");
-    const backP = doc.createElement("p");
-    makeNext.setAttribute("id", "next");
-    makeNext.addEventListener("click", () => click('next'));
-    makeBack.setAttribute("id", "back");
-    makeBack.addEventListener("click", () => click('back'));
-    updateP.setAttribute("id", "page-num");
-    const loc = doc.getElementById("pagination");
-    const hereId = doc.getElementById("here");
-    const pageId = doc.getElementById("page-num");
-    const nextId = doc.getElementById("next");
-    const backId = doc.getElementById("back");
-    let update = `Page ${pageCounter}`;
-    let next = "Next";
-    let back = "Back";
-    nextP.append(next);
-    backP.append(back);
-    makeNext.append(nextP);
-    makeBack.append(backP);
-    updateP.append(update);
+    const api_url = "https://swapi.dev/api/species/"
+    let api_url_species = (api_url + `?page=${newPageNum}`);
+    const {dataSizeAll, dataSizePage, rawData, api_next} = await getInfo(api_url_species);
     
-    await updateSpeciesInfo();
+    let infoSpecies = rawData.map(({name, classification, language}) => ({name, classification, language}));   
+    let numOfPages = Math.trunc(dataSizeAll / dataSizePage);
 
-    if (pageListener == 1 && move == "next") {
-        pageId.replaceWith(updateP);
-        loc.insertBefore(makeBack, hereId);
-        pageListener++;
-    } else if (pageListener == 2 && move == "back") {
-        pageId.replaceWith(updateP);
-        backId.remove();
-        pageListener--;
-    } else if (pageListener > (globalCountPages - 1) && move == "next") {
-        pageId.replaceWith(updateP);
-        nextId.remove();
-        pageListener++;
-    } else if (pageListener > globalCountPages && move == "back") {
-        pageId.replaceWith(updateP);
-        loc.append(makeNext);
-        pageListener--;
-    } else if (pageListener > 1 && pageListener <= globalCountPages && move == "next") {
-        pageId.replaceWith(updateP);
-        pageListener++;
-    } else if (pageListener > 1 && pageListener <= globalCountPages && move == "back") {
-        pageId.replaceWith(updateP);
-        pageListener--;
+    removeContent();
+    if (api_next === null) {
+        doc.getElementById("next").remove();
     }
 
-    disableLoader();
+    setContent(dataSizePage, infoSpecies);
+    enablePagination();
+    return numOfPages;
 }
 
-async function getSpeciesInfo () {
-    let response = await fetch(api_url);
-    let data = await response.json();
-    let dataSize = data.results.length;
-    let rawSpecies = data.results;
-    let infoSpecies = rawSpecies.map(({name, classification, language}) => ({name, classification, language}));
-    globalNext = data.next;
-    globalBack = data.previous;
-    globalCountPages = Math.trunc(data.count / dataSize);
+async function updateAllContent (move) {
+    let newPageNum = findPageNum(move);
 
-    removePagination();
-    setPagination();
-    removeDivs();
-    setDivs(dataSize, infoSpecies);
-    disableLoader();
+    const {nextTag, backTag} = updatePaginationTags();
+    nextTag.addEventListener("click", () => click('next'));
+    backTag.addEventListener("click", () => click('back'));
+
+    let numOfPages = await updateSpecies(newPageNum);
+
+    finalizePagination(numOfPages, newPageNum, move, nextTag, backTag);
 }
 
-function click(value) {
+const click = (value) => {
+    enableLoader();
     if (value == "next") {
-        api_url = globalNext;
-        pageCounter++;
-        enableLoader();
-        updatePage("next");
+        updateAllContent("next");
     } else if (value == "back") {
-        api_url = globalBack;
-        pageCounter--;
-        enableLoader();
-        updatePage("back");
+        updateAllContent("back");
     }
 }
 
-export {getSpeciesInfo};
+async function getSpecies (api_url_species) {
+    const {dataSizePage, rawData} = await getInfo(api_url_species);
+    let infoSpecies = rawData.map(({name, classification, language}) => ({name, classification, language}));
+
+    removeAllContent();
+
+    const nextTag = setPagination();
+    nextTag.addEventListener("click", () => click('next'));
+
+    setContent(dataSizePage, infoSpecies);
+    disableLoader();
+}
+
+export {getSpecies};
